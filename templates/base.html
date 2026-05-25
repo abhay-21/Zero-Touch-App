@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Zero Touch{% endblock %} | ज़ीरो टच ऐप 🇮🇳</title>
+    <meta name="description" content="{% block meta_desc %}Zero Touch App — Bharat ka apna social media{% endblock %}">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── SIDEBAR NAV (Desktop) ── -->
+<aside class="sidenav" id="sidenav">
+    <div class="sidenav__brand">
+        <div class="brand-orb">⚡</div>
+        <div>
+            <div class="brand-name">Zero Touch</div>
+            <div class="brand-tagline">Bharat ka apna social</div>
+        </div>
+    </div>
+
+    <nav class="sidenav__links">
+        <a href="{{ url_for('feed') }}" class="snav-link {% if request.endpoint == 'feed' %}active{% endif %}" id="nav-gram">
+            <span class="snav-icon">🏠</span>
+            <span class="snav-label">Gram <small>Feed</small></span>
+        </a>
+        <a href="{{ url_for('trending') }}" class="snav-link {% if request.endpoint == 'trending' %}active{% endif %}" id="nav-tez">
+            <span class="snav-icon">🔥</span>
+            <span class="snav-label">Tez <small>Trending</small></span>
+        </a>
+        <a href="{{ url_for('boards') }}" class="snav-link {% if request.endpoint == 'boards' %}active{% endif %}" id="nav-saaj">
+            <span class="snav-icon">📌</span>
+            <span class="snav-label">Saaj <small>Boards</small></span>
+        </a>
+        <a href="{{ url_for('reels') }}" class="snav-link {% if request.endpoint == 'reels' %}active{% endif %}" id="nav-reel">
+            <span class="snav-icon">🎬</span>
+            <span class="snav-label">Reel <small>Shorts</small></span>
+        </a>
+        <a href="{{ url_for('communities') }}" class="snav-link {% if request.endpoint in ['communities','community_detail'] %}active{% endif %}" id="nav-samaj">
+            <span class="snav-icon">👥</span>
+            <span class="snav-label">Samaj <small>Communities</small></span>
+        </a>
+        <div class="snav-divider"></div>
+        <a href="{{ url_for('notifications') }}" class="snav-link notif-link {% if request.endpoint == 'notifications' %}active{% endif %}" id="nav-notif">
+            <span class="snav-icon">🔔</span>
+            <span class="snav-label">Suchna <small>Notifications</small></span>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+        </a>
+        <a href="{{ url_for('profile') }}" class="snav-link {% if request.endpoint == 'profile' %}active{% endif %}" id="nav-profile">
+            <span class="snav-icon">👤</span>
+            <span class="snav-label">Pehchaan <small>Profile</small></span>
+        </a>
+    </nav>
+
+    <div class="sidenav__footer">
+        {% set cu = current_user() %}
+        {% if cu %}
+        <a href="{{ url_for('profile') }}" class="snav-user-pill">
+            <img src="{{ cu.avatar_url }}" alt="{{ cu.username }}" class="snav-avatar">
+            <div>
+                <div class="snav-username">{{ cu.username }}</div>
+                <div class="snav-karma">⭐ {{ cu.karma }} karma</div>
+            </div>
+        </a>
+        <a href="{{ url_for('logout') }}" class="snav-logout">
+            <i data-feather="log-out"></i> Bahar Jao
+        </a>
+        {% endif %}
+    </div>
+</aside>
+
+<!-- ── MOBILE TOPBAR ── -->
+<header class="mobile-topbar">
+    <div class="mobile-brand">⚡ Zero Touch</div>
+    <div class="mobile-actions">
+        <a href="{{ url_for('notifications') }}" class="mobile-icon-btn notif-link">
+            <i data-feather="bell"></i>
+            <span class="notif-badge-mobile" id="notifBadgeMobile" style="display:none">0</span>
+        </a>
+        <a href="{{ url_for('profile') }}" class="mobile-icon-btn">
+            <i data-feather="user"></i>
+        </a>
+    </div>
+</header>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="page-main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-stack">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">
+                {% if category == 'success' %}✅{% elif category == 'error' %}❌{% elif category == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+                {{ message }}
+                <button class="flash-close" onclick="this.parentElement.remove()">✕</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<nav class="mobile-bottomnav">
+    <a href="{{ url_for('feed') }}" class="mbnav-item {% if request.endpoint == 'feed' %}active{% endif %}">
+        <span>🏠</span><small>Gram</small>
+    </a>
+    <a href="{{ url_for('trending') }}" class="mbnav-item {% if request.endpoint == 'trending' %}active{% endif %}">
+        <span>🔥</span><small>Tez</small>
+    </a>
+    <a href="{{ url_for('reels') }}" class="mbnav-item {% if request.endpoint == 'reels' %}active{% endif %}">
+        <span>🎬</span><small>Reel</small>
+    </a>
+    <a href="{{ url_for('communities') }}" class="mbnav-item {% if request.endpoint in ['communities','community_detail'] %}active{% endif %}">
+        <span>👥</span><small>Samaj</small>
+    </a>
+    <a href="{{ url_for('profile') }}" class="mbnav-item {% if request.endpoint == 'profile' %}active{% endif %}">
+        <span>👤</span><small>Main</small>
+    </a>
+</nav>
+
+<!-- ── ONBOARDING MODAL (first time) ── -->
+{% if session.get('new_user') %}
+<div class="modal-overlay" id="onboardingOverlay">
+    <div class="modal onboarding-modal">
+        <div class="onboarding-slides">
+            <div class="ob-slide active" id="ob1">
+                <div class="ob-emoji">🙏</div>
+                <h2>Swagat Hai!</h2>
+                <p><strong>Zero Touch App</strong> mein aapka haardik swagat hai — <em>Bharat ka apna social media</em>!</p>
+            </div>
+            <div class="ob-slide" id="ob2">
+                <div class="ob-emoji">📲</div>
+                <h2>5 Jadui Tabs</h2>
+                <ul class="ob-list">
+                    <li>🏠 <strong>Gram</strong> — Apna feed dekho</li>
+                    <li>🔥 <strong>Tez</strong> — Trending topics</li>
+                    <li>📌 <strong>Saaj</strong> — Apna board banao</li>
+                    <li>🎬 <strong>Reel</strong> — Desi videos dekho</li>
+                    <li>👥 <strong>Samaj</strong> — Community join karo</li>
+                </ul>
+            </div>
+            <div class="ob-slide" id="ob3">
+                <div class="ob-emoji">🚀</div>
+                <h2>Shuru Karo!</h2>
+                <p>Post karo, like karo, comment karo, aur apni community banao. Karma badhao! ⭐</p>
+                <button class="btn-saffron" onclick="closeOnboarding()">Chalte Hain! 🎉</button>
+            </div>
+        </div>
+        <div class="ob-controls">
+            <div class="ob-dots">
+                <div class="ob-dot active" id="dot1"></div>
+                <div class="ob-dot" id="dot2"></div>
+                <div class="ob-dot" id="dot3"></div>
+            </div>
+            <button class="ob-next-btn" id="obNextBtn" onclick="nextSlide()">Aage →</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% block scripts %}{% endblock %}
+
+<script>
+feather.replace();
+
+// Notification poll
+async function pollNotifications() {
+    try {
+        const r = await fetch('/api/notification-count');
+        const d = await r.json();
+        const count = d.count;
+        ['notifBadge','notifBadgeMobile'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.textContent = count; el.style.display = count > 0 ? 'flex' : 'none'; }
+        });
+    } catch(e) {}
+}
+pollNotifications();
+setInterval(pollNotifications, 15000);
+
+// Onboarding
+let currentSlide = 1;
+function nextSlide() {
+    document.getElementById('ob' + currentSlide).classList.remove('active');
+    document.getElementById('dot' + currentSlide).classList.remove('active');
+    currentSlide++;
+    if (currentSlide <= 3) {
+        document.getElementById('ob' + currentSlide).classList.add('active');
+        document.getElementById('dot' + currentSlide).classList.add('active');
+        if (currentSlide === 3) document.getElementById('obNextBtn').style.display = 'none';
+    }
+}
+function closeOnboarding() {
+    document.getElementById('onboardingOverlay').style.opacity = '0';
+    setTimeout(() => document.getElementById('onboardingOverlay').remove(), 300);
+}
+
+// Like buttons (AJAX)
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.like-btn-ajax');
+    if (!btn) return;
+    e.preventDefault();
+    const postId = btn.dataset.postId;
+    fetch(`/like/${postId}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+            btn.classList.toggle('liked', d.liked);
+            const countEl = btn.querySelector('.like-count');
+            if (countEl) countEl.textContent = d.count;
+        });
+});
+</script>
+</body>
+</html>

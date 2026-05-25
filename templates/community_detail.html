@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ community.name }} — Samaj{% endblock %}
+{% block content %}
+<div class="page-layout">
+    <aside class="feed-left">
+        <div class="widget">
+            <div class="cc-emoji-lg">{{ community.emoji }}</div>
+            <h3 style="font-size:1.4rem;margin: 8px 0 4px">{{ community.name }}</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted)">{{ community.description }}</p>
+            <div class="cc-stat-row">
+                <div><strong>{{ community.member_count }}</strong><br><small>Members</small></div>
+                <div><strong>{{ community.posts.count() }}</strong><br><small>Posts</small></div>
+            </div>
+            <form action="{{ url_for('join_community', community_id=community.id) }}" method="POST">
+                {% if is_member %}
+                <button type="submit" class="btn-outline-red btn-full">Chhod Do</button>
+                {% else %}
+                <button type="submit" class="btn-saffron btn-full">Join Karo 🤝</button>
+                {% endif %}
+            </form>
+        </div>
+    </aside>
+
+    <section class="feed-center">
+        <div class="page-hero-header">
+            <h2>{{ community.emoji }} {{ community.name }}</h2>
+            <p>{{ community.description }}</p>
+        </div>
+        {% for post in posts %}
+        {% include 'partials/post_card.html' %}
+        {% else %}
+        <div class="empty-state">
+            <div class="es-emoji">🌿</div>
+            <h3>Abhi koi post nahi</h3>
+            <p>Pehli post karo is samaj mein!</p>
+        </div>
+        {% endfor %}
+    </section>
+
+    <aside class="feed-right">
+        <a href="{{ url_for('communities') }}" class="pill" style="margin-bottom:16px;display:inline-block">← Saare Samaj</a>
+    </aside>
+</div>
+{% endblock %}

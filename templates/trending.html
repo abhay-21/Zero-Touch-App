@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Tez — Trending{% endblock %}
+{% block content %}
+<div class="page-layout">
+    <aside class="feed-left">
+        <div class="widget">
+            <h4 class="widget-title">🔥 Categories</h4>
+            <div class="filter-pills vertical">
+                <a href="{{ url_for('trending', cat='all') }}" class="pill {% if category == 'all' %}active{% endif %}">🌐 Sab Kuch</a>
+                <a href="{{ url_for('trending', cat='cricket') }}" class="pill {% if category == 'cricket' %}active{% endif %}">🏏 Cricket</a>
+                <a href="{{ url_for('trending', cat='cinema') }}" class="pill {% if category == 'cinema' %}active{% endif %}">🎬 Cinema</a>
+                <a href="{{ url_for('trending', cat='food') }}" class="pill {% if category == 'food' %}active{% endif %}">🍛 Khaana</a>
+                <a href="{{ url_for('trending', cat='tech') }}" class="pill {% if category == 'tech' %}active{% endif %}">💻 Tech</a>
+                <a href="{{ url_for('trending', cat='memes') }}" class="pill {% if category == 'memes' %}active{% endif %}">😂 Memes</a>
+            </div>
+        </div>
+    </aside>
+
+    <section class="feed-center">
+        <div class="page-hero-header">
+            <h2>🔥 Tez — Trending in Bharat</h2>
+            <p>Aaj kya ho raha hai poore desh mein!</p>
+        </div>
+        {% for post in posts %}
+        <div class="post-card trending-rank">
+            <div class="trend-rank-badge">#{{ loop.index }}</div>
+            {% include 'partials/post_card.html' %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="es-emoji">📭</div>
+            <h3>Abhi koi trend nahi</h3>
+            <p>Pehli post karo aur trend set karo!</p>
+        </div>
+        {% endfor %}
+    </section>
+
+    <aside class="feed-right">
+        <div class="widget">
+            <h4 class="widget-title">⚡ Real-time Score</h4>
+            <p style="font-size:0.85rem;color:var(--text-muted)">Posts ke likes aur recency se score calculate hota hai. Zyada fresh post = zyada score!</p>
+        </div>
+    </aside>
+</div>
+{% endblock %}

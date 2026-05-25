@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Reel — Desi Shorts{% endblock %}
+{% block content %}
+<div class="page-layout">
+    <aside class="feed-left">
+        <div class="widget">
+            <h4 class="widget-title">🎬 Reel kya hai?</h4>
+            <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.6">YouTube videos aur short clips yahan share karo. Post mein YouTube URL dalo aur sabka favorite ban jao!</p>
+        </div>
+        <div class="widget">
+            <h4 class="widget-title">🎵 Categories</h4>
+            <div class="filter-pills vertical">
+                <a href="#" class="pill active">🎬 Sab</a>
+                <a href="#" class="pill">🏏 Cricket Highlights</a>
+                <a href="#" class="pill">😂 Comedy</a>
+                <a href="#" class="pill">🎵 Music</a>
+                <a href="#" class="pill">🍛 Food Videos</a>
+            </div>
+        </div>
+    </aside>
+
+    <section class="feed-center">
+        <div class="page-hero-header">
+            <h2>🎬 Reel — Desi Shorts</h2>
+            <p>YouTube aur desi videos ka asli adda</p>
+        </div>
+
+        <!-- Video Grid -->
+        {% if video_posts %}
+        <div class="reel-grid">
+            {% for post in video_posts %}
+            {% if post.video_url %}
+            <div class="reel-card">
+                {% set vid_id = post.video_url.split('v=')[-1].split('&')[0] if 'v=' in post.video_url else post.video_url.split('/')[-1] %}
+                <div class="reel-iframe-wrap">
+                    <iframe src="https://www.youtube.com/embed/{{ vid_id }}"
+                            frameborder="0" allowfullscreen loading="lazy"></iframe>
+                </div>
+                <div class="reel-info">
+                    <div class="post-author-link-mini">
+                        <img src="{{ post.author.avatar_url }}" class="avatar-xs">
+                        <span>{{ post.author.username }}</span>
+                    </div>
+                    <p class="reel-caption">{{ post.content[:80] }}{% if post.content|length > 80 %}...{% endif %}</p>
+                    <div class="reel-stats">
+                        <span class="like-btn-ajax {% if post.id in liked_ids %}liked{% endif %}" 
+                              data-post-id="{{ post.id }}" style="cursor:pointer">
+                            ❤️ <span class="like-count">{{ post.like_count }}</span>
+                        </span>
+                        <span>💬 {{ post.comment_count }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Regular posts that could become reels -->
+        <h3 style="margin: 32px 0 16px; color: var(--text-secondary); font-size:1rem">📱 Latest Posts</h3>
+        {% for post in all_posts %}
+        {% include 'partials/post_card.html' %}
+        {% endfor %}
+    </section>
+
+    <aside class="feed-right">
+        <div class="widget">
+            <h4 class="widget-title">🎙️ Reel Kaise Share Karein?</h4>
+            <ol class="tips-list" style="padding-left:16px">
+                <li>Gram mein nayi post banao</li>
+                <li>YouTube video ka link daalo</li>
+                <li>Post karo — automatically Reel tab mein aayega!</li>
+            </ol>
+        </div>
+    </aside>
+</div>
+{% endblock %}

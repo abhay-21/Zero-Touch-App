@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Zero Touch App 🇮🇳</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body">
+
+<div class="auth-container">
+    <div class="auth-panel-left">
+        <div class="auth-brand">
+            <div class="auth-orb">⚡</div>
+            <h1>Zero Touch App</h1>
+            <p>Bharat ke 140 crore logo ka apna platform 🇮🇳</p>
+        </div>
+        <div class="register-steps">
+            <div class="rs-step done" id="step1"><div class="rs-num">1</div><span>Phone Darj Karo</span></div>
+            <div class="rs-step" id="step2"><div class="rs-num">2</div><span>Profile Banao</span></div>
+            <div class="rs-step" id="step3"><div class="rs-num">3</div><span>Samaj Join Karo</span></div>
+        </div>
+        <div class="auth-quote">"Shuru karo, aage badho, Bharat badlo!"</div>
+    </div>
+
+    <div class="auth-panel-right">
+        <div class="auth-form-card">
+            <h2 class="auth-title">Zero Touch Parivar Mein Aao! 🎊</h2>
+            <p class="auth-subtitle">Free mein register karo — sirf 2 minute</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="flash flash-{{ category }} mb-16">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">📱 Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="phone" name="phone" class="form-input"
+                               placeholder="9876543210" required maxlength="15" pattern="[0-9]{10,15}">
+                        <span class="form-hint">OTP verification ke liye</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="username">🏷️ Username <span class="required">*</span></label>
+                        <input type="text" id="username" name="username" class="form-input"
+                               placeholder="RahulDilli" required maxlength="30" pattern="[a-zA-Z0-9_]+">
+                        <span class="form-hint">Sirf letters, numbers, underscore</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-password">🔐 Password <span class="required">*</span></label>
+                    <div class="input-with-toggle">
+                        <input type="password" id="reg-password" name="password" class="form-input"
+                               placeholder="Strong password banao" required minlength="6">
+                        <button type="button" class="toggle-pw" onclick="togglePw('reg-password')">👁️</button>
+                    </div>
+                    <div class="password-strength" id="pwStrength"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">✍️ Bio <span class="optional">(optional)</span></label>
+                    <input type="text" id="bio" name="bio" class="form-input"
+                           placeholder="Dilli ka banda | Cricket lover 🏏" maxlength="200">
+                </div>
+
+                <div class="form-group">
+                    <label for="upi">💸 UPI ID <span class="optional">(optional)</span></label>
+                    <input type="text" id="upi" name="upi" class="form-input"
+                           placeholder="yourname@upi">
+                    <span class="form-hint">Log aapko tip de payenge</span>
+                </div>
+
+                <div class="terms-check">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">Main Zero Touch App ki <a href="#">Terms</a> se sahmat hoon</label>
+                </div>
+
+                <button type="submit" class="btn-saffron btn-full" id="register-btn">
+                    Account Banao! 🎉
+                </button>
+            </form>
+
+            <div class="auth-divider"><span>ya</span></div>
+            <p class="auth-switch">Pehle se account hai? <a href="{{ url_for('login') }}">Login Karo</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePw(id) {
+    const el = document.getElementById(id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+}
+document.getElementById('reg-password').addEventListener('input', function() {
+    const val = this.value;
+    const el = document.getElementById('pwStrength');
+    let strength = 0;
+    if (val.length >= 6) strength++;
+    if (val.length >= 10) strength++;
+    if (/[A-Z]/.test(val)) strength++;
+    if (/[0-9]/.test(val)) strength++;
+    if (/[^a-zA-Z0-9]/.test(val)) strength++;
+    const labels = ['', 'Kamzor 😬', 'Theek hai 🤔', 'Acha hai 👍', 'Zyada acha 💪', 'Bahut strong! 🔒'];
+    const colors = ['', '#ef4444','#f59e0b','#eab308','#22c55e','#10b981'];
+    el.innerHTML = val.length > 0 ? `<span style="color:${colors[strength]}">${labels[strength]}</span>` : '';
+});
+</script>
+</body>
+</html>

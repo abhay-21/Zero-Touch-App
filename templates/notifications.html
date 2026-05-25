@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Suchna — Notifications{% endblock %}
+{% block content %}
+<div class="page-layout-narrow">
+    <div class="page-hero-header">
+        <h2>🔔 Suchna — Notifications</h2>
+        <p>Kya ho raha hai aapke ird-gird</p>
+    </div>
+    <div class="notif-list">
+        {% for n in notifications %}
+        <div class="notif-item {% if not n.read %}unread{% endif %}">
+            {% if n.actor %}
+            <img src="{{ n.actor.avatar_url }}" alt="{{ n.actor.username }}" class="avatar-md">
+            {% else %}
+            <div class="notif-system-icon">⚡</div>
+            {% endif %}
+            <div class="notif-body">
+                <p class="notif-message">{{ n.message }}</p>
+                <span class="notif-time">{{ n.created_at.strftime('%d %b, %H:%M') }}</span>
+            </div>
+            {% if not n.read %}<div class="notif-unread-dot"></div>{% endif %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="es-emoji">🔕</div>
+            <h3>Abhi koi notification nahi</h3>
+            <p>Post karo, like karo — tab ayega!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

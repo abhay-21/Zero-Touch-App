@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }} — Pehchaan{% endblock %}
+{% block content %}
+
+<!-- UPI Modal -->
+<div class="modal-overlay" id="upiModal" style="display:none;opacity:0;transition:opacity 0.3s">
+    <div class="modal upi-modal">
+        <div class="upi-modal-header">
+            <h3>💸 Support karo via UPI</h3>
+            <button class="modal-close" onclick="closeUpiModal()">✕</button>
+        </div>
+        <div class="upi-modal-body">
+            <div class="upi-avatar-row">
+                <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="avatar-lg">
+                <div>
+                    <div class="upi-creator-name">{{ user.username }}</div>
+                    {% if user.upi_id %}<div class="upi-id-display">📱 {{ user.upi_id }}</div>{% endif %}
+                </div>
+            </div>
+            {% if user.upi_id %}
+            <div class="upi-amounts">
+                <button class="upi-amount-btn" onclick="setUpiAmount(10)">₹10</button>
+                <button class="upi-amount-btn" onclick="setUpiAmount(21)">₹21</button>
+                <button class="upi-amount-btn" onclick="setUpiAmount(51)">₹51</button>
+                <button class="upi-amount-btn" onclick="setUpiAmount(101)">₹101</button>
+            </div>
+            <p class="upi-instruction">UPI App mein yeh ID use karo:<br>
+               <strong>{{ user.upi_id }}</strong></p>
+            {% else %}
+            <p style="text-align:center;color:var(--text-muted)">Creator ne abhi UPI set nahi kiya.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="profile-page">
+    <!-- Cover -->
+    <div class="profile-cover" style="background: linear-gradient(135deg, var(--saffron), var(--lotus-pink), var(--peacock))">
+        <div class="profile-cover-pattern">🇮🇳 ⚡ 🎊 🪔 🏏 🎬 🍛 ⭐</div>
+    </div>
+
+    <!-- Profile Info Card -->
+    <div class="profile-info-card glass">
+        <div class="profile-avatar-wrap">
+            <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="profile-avatar-lg">
+            {% if is_self %}
+            <button class="avatar-edit-btn" onclick="document.getElementById('avatarEditModal').style.display='flex'">✏️</button>
+            {% endif %}
+        </div>
+        <div class="profile-details">
+            <div class="profile-name-row">
+                <h2 class="profile-username">{{ user.username }}</h2>
+                {% if user.verified %}<span class="verified-badge-lg">✓ Verified</span>{% endif %}
+            </div>
+            {% if user.bio %}
+            <p class="profile-bio">{{ user.bio }}</p>
+            {% endif %}
+            <div class="profile-stats-row">
+                <div class="pstat"><strong>{{ posts|length }}</strong><span>Posts</span></div>
+                <div class="pstat"><strong>{{ user.followers_count }}</strong><span>Followers</span></div>
+                <div class="pstat"><strong>{{ user.following_count }}</strong><span>Following</span></div>
+                <div class="pstat"><strong>⭐ {{ user.karma }}</strong><span>Karma</span></div>
+            </div>
+            <div class="profile-actions-row">
+                {% if is_self %}
+                <button class="btn-saffron" onclick="document.getElementById('editProfileModal').style.display='flex'">✏️ Edit Profile</button>
+                {% else %}
+                <form action="{{ url_for('follow_user', user_id=user.id) }}" method="POST" style="display:inline">
+                    {% if is_following %}
+                    <button type="submit" class="btn-outline-red">Unfollow</button>
+                    {% else %}
+                    <button type="submit" class="btn-saffron">Follow Karo 💛</button>
+                    {% endif %}
+                </form>
+                {% if user.upi_id %}
+                <button class="btn-peacock" onclick="document.getElementById('upiModal').style.display='flex';setTimeout(()=>document.getElementById('upiModal').style.opacity='1',10)">
+                    💸 Tip via UPI
+                </button>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs: Posts | Boards -->
+    <div class="profile-tabs">
+        <button class="ptab active" id="tabPosts" onclick="showTab('posts')">📝 Posts ({{ posts|length }})</button>
+        <button class="ptab" id="tabBoards" onclick="showTab('boards')">📌 Boards ({{ boards|length }})</button>
+    </div>
+
+    <!-- Posts Tab -->
+    <div id="tabContentPosts" class="profile-tab-content">
+        <div class="profile-posts-feed">
+            {% for post in posts %}
+            {% include 'partials/post_card.html' %}
+            {% else %}
+            <div class="empty-state">
+                <div class="es-emoji">📝</div>
+                <h3>Abhi koi post nahi</h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Boards Tab -->
+    <div id="tabContentBoards" class="profile-tab-content" style="display:none">
+        <div class="boards-grid-profile">
+            {% for board in boards %}
+            <div class="board-card-profile glass">
+                <div class="bcp-emoji">{{ board.emoji }}</div>
+                <div class="bcp-name">{{ board.name }}</div>
+                <div class="bcp-count">{{ board.pins.count() }} pins</div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="es-emoji">📌</div>
+                <h3>Koi board nahi</h3>
+                <p><a href="{{ url_for('boards') }}">Saaj mein jao aur board banao!</a></p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+{% if is_self %}
+<div class="modal-overlay" id="editProfileModal" style="display:none">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>✏️ Profile Update Karo</h3>
+            <button class="modal-close" onclick="document.getElementById('editProfileModal').style.display='none'">✕</button>
+        </div>
+        <form action="{{ url_for('edit_profile') }}" method="POST" class="auth-form">
+            <div class="form-group">
+                <label>🏷️ Username (naam)</label>
+                <input type="text" name="username" class="form-input"
+                       value="{{ user.username }}" maxlength="30"
+                       pattern="[a-zA-Z0-9_]+"
+                       placeholder="RahulDilli">
+                <span class="form-hint">Sirf letters, numbers, underscore — spaces nahi</span>
+            </div>
+            <div class="form-group">
+                <label>✍️ Bio</label>
+                <input type="text" name="bio" class="form-input"
+                       value="{{ user.bio or '' }}" maxlength="200"
+                       placeholder="Apne baare mein kuch likho...">
+            </div>
+            <div class="form-group">
+                <label>💸 UPI ID</label>
+                <input type="text" name="upi" class="form-input"
+                       value="{{ user.upi_id or '' }}" placeholder="yourname@upi">
+            </div>
+            <div class="form-group">
+                <label>🎨 Avatar Style (koi bhi word likho)</label>
+                <input type="text" name="avatar_seed" class="form-input"
+                       placeholder="koi bhi word" value="{{ user.avatar_seed or user.username }}">
+                <span class="form-hint">Badloge toh avatar change ho jaayega</span>
+            </div>
+            <button type="submit" class="btn-saffron btn-full">Save Karo ✅</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showTab(tab) {
+    document.getElementById('tabContentPosts').style.display = tab === 'posts' ? 'block' : 'none';
+    document.getElementById('tabContentBoards').style.display = tab === 'boards' ? 'block' : 'none';
+    document.getElementById('tabPosts').classList.toggle('active', tab === 'posts');
+    document.getElementById('tabBoards').classList.toggle('active', tab === 'boards');
+}
+function closeUpiModal() {
+    const m = document.getElementById('upiModal');
+    m.style.opacity = '0';
+    setTimeout(() => m.style.display = 'none', 300);
+}
+function showUpiModal(username, upi) {
+    document.getElementById('upiModal').style.display = 'flex';
+    setTimeout(() => document.getElementById('upiModal').style.opacity = '1', 10);
+}
+function setUpiAmount(amt) {
+    document.querySelectorAll('.upi-amount-btn').forEach(b => b.classList.remove('selected'));
+    event.target.classList.add('selected');
+}
+</script>
+{% endblock %}

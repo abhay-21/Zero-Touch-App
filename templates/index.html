@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Gram — Feed{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+
+    <!-- ── LEFT: Filters & Communities ── -->
+    <aside class="feed-left">
+        <div class="widget">
+            <h4 class="widget-title">📊 Kaise Dekhna Hai?</h4>
+            <div class="filter-pills">
+                <a href="{{ url_for('feed', filter='latest') }}" class="pill {% if filter_type == 'latest' %}active{% endif %}">🕐 Latest</a>
+                <a href="{{ url_for('feed', filter='popular') }}" class="pill {% if filter_type == 'popular' %}active{% endif %}">🔥 Popular</a>
+                <a href="{{ url_for('feed', filter='following') }}" class="pill {% if filter_type == 'following' %}active{% endif %}">💛 Following</a>
+            </div>
+        </div>
+        <div class="widget">
+            <h4 class="widget-title">👥 Apni Samaj</h4>
+            <div class="community-mini-list">
+                {% for c in communities[:8] %}
+                <a href="{{ url_for('feed', community=c.id) }}" class="cml-item">
+                    <span>{{ c.emoji }}</span>
+                    <span>{{ c.name }}</span>
+                    <span class="cml-count">{{ c.member_count }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="widget trending-tags-widget">
+            <h4 class="widget-title">🏷️ Hot Tags</h4>
+            <div class="tag-cloud">
+                <span class="tag-chip">#Cricket</span>
+                <span class="tag-chip">#Bollywood</span>
+                <span class="tag-chip">#Diwali</span>
+                <span class="tag-chip">#IPL</span>
+                <span class="tag-chip">#MadeInIndia</span>
+                <span class="tag-chip">#Memes</span>
+                <span class="tag-chip">#Chai</span>
+                <span class="tag-chip">#Travel</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── CENTER: Feed ── -->
+    <section class="feed-center">
+
+        <!-- Create Post Card -->
+        <div class="create-post-card">
+            <form action="{{ url_for('create_post') }}" method="POST" id="createPostForm">
+                <div class="cp-top">
+                    {% set cu = current_user() %}
+                    <img src="{{ cu.avatar_url }}" alt="{{ cu.username }}" class="avatar-md">
+                    <textarea name="content" id="postContent" class="cp-textarea" 
+                              placeholder="Kya chal raha hai? Share karo Bharat ke saath... 🇮🇳" required
+                              rows="3"></textarea>
+                </div>
+                <!-- Expandable Options -->
+                <div class="cp-options" id="cpOptions" style="display:none">
+                    <div class="form-row">
+                        <div class="form-group-sm">
+                            <label>🖼️ Image URL (optional)</label>
+                            <input type="url" name="image_url" class="form-input-sm" placeholder="https://...">
+                        </div>
+                        <div class="form-group-sm">
+                            <label>🎬 YouTube URL (Reel)</label>
+                            <input type="url" name="video_url" class="form-input-sm" placeholder="https://youtube.com/...">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-sm">
+                            <label>🏷️ Tags</label>
+                            <input type="text" name="tags" class="form-input-sm" placeholder="#Cricket #IPL">
+                        </div>
+                        <div class="form-group-sm">
+                            <label>👥 Community</label>
+                            <select name="community_id" class="form-input-sm">
+                                <option value="">-- None --</option>
+                                {% for c in communities %}
+                                <option value="{{ c.id }}">{{ c.emoji }} {{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="cp-footer">
+                    <div class="cp-actions">
+                        <button type="button" class="cp-action-btn" onclick="toggleCpOptions()" title="Add More">
+                            <i data-feather="plus-circle"></i> More
+                        </button>
+                        <button type="button" class="cp-action-btn" title="Voice (Coming Soon)">
+                            <i data-feather="mic"></i> Voice
+                        </button>
+                        <button type="button" class="cp-action-btn" title="Location (Coming Soon)">
+                            <i data-feather="map-pin"></i> Location
+                        </button>
+                    </div>
+                    <button type="submit" class="btn-saffron">Post Karo 🚀</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Posts Feed -->
+        {% for post in posts %}
+        {% include 'partials/post_card.html' %}
+        {% else %}
+        <div class="empty-state">
+            <div class="es-emoji">🌾</div>
+            <h3>Koi post nahi mili</h3>
+            <p>Pehli post karo ya kisi ko follow karo!</p>
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- ── RIGHT: Suggestions & Info ── -->
+    <aside class="feed-right">
+        <div class="widget">
+            <h4 class="widget-title">🏆 Trending Samaj</h4>
+            {% for c in communities[:5] %}
+            <div class="samaj-card-mini">
+                <div class="samaj-icon">{{ c.emoji }}</div>
+                <div>
+                    <div class="samaj-name">{{ c.name }}</div>
+                    <div class="samaj-members">{{ c.member_count }} members</div>
+                </div>
+                <a href="{{ url_for('community_detail', community_id=c.id) }}" class="pill-sm">Dekho</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="widget made-in-india-widget">
+            <div class="mii-flag">🇮🇳</div>
+            <h4>Made in India</h4>
+            <p>Zero Touch App — Apna desi social network. Data Bharat mein, Bharat ke liye!</p>
+        </div>
+    </aside>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleCpOptions() {
+    const el = document.getElementById('cpOptions');
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    feather.replace();
+}
+// Auto-expand textarea
+document.getElementById('postContent').addEventListener('focus', function() {
+    document.getElementById('cpOptions').style.display = 'block';
+    feather.replace();
+});
+</script>
+{% endblock %}

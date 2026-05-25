@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Saaj — Boards{% endblock %}
+{% block content %}
+<div class="page-layout">
+
+    <aside class="feed-left">
+        <div class="widget">
+            <h4 class="widget-title">📌 Mere Boards</h4>
+            {% for board in my_boards %}
+            <div class="board-mini-item">
+                <span>{{ board.emoji }}</span>
+                <div>
+                    <div class="board-mini-name">{{ board.name }}</div>
+                    <div class="board-mini-count">{{ board.pins.count() }} pins</div>
+                </div>
+            </div>
+            {% else %}
+            <p style="font-size:0.8rem;color:var(--text-muted)">Abhi koi board nahi. Neeche banao!</p>
+            {% endfor %}
+        </div>
+
+        <!-- Create Board Form -->
+        <div class="widget">
+            <h4 class="widget-title">✨ Naya Board Banao</h4>
+            <form action="{{ url_for('create_board') }}" method="POST" class="auth-form">
+                <div class="form-group">
+                    <label>Board ka Naam</label>
+                    <input type="text" name="name" class="form-input" placeholder="Cricket Memories" required>
+                </div>
+                <div class="form-group">
+                    <label>Emoji</label>
+                    <div class="emoji-picker">
+                        {% for em in ['📌','🏏','🎬','🍛','✈️','🧘','😂','💻','❤️','🌸','🎵','📚'] %}
+                        <input type="radio" name="emoji" id="em-{{ em }}" value="{{ em }}" {% if loop.first %}checked{% endif %}>
+                        <label for="em-{{ em }}" class="emoji-option">{{ em }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <button type="submit" class="btn-saffron btn-full">Board Banao! 📌</button>
+            </form>
+        </div>
+    </aside>
+
+    <section class="boards-center">
+        <div class="page-hero-header">
+            <h2>📌 Saaj — Apna Collection</h2>
+            <p>Pinterest ki tarah, par bilkul Desi! Apni pasand save karo.</p>
+        </div>
+        <div class="masonry-grid">
+            {% for post in all_posts %}
+            <div class="masonry-item">
+                {% if post.image_url %}
+                <div class="masonry-img-wrap">
+                    <img src="{{ post.image_url }}" alt="Pin" loading="lazy" onerror="this.parentElement.style.display='none'">
+                </div>
+                {% endif %}
+                <div class="masonry-content">
+                    <p class="masonry-text">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
+                    <div class="masonry-meta">
+                        <img src="{{ post.author.avatar_url }}" class="avatar-xs">
+                        <span>{{ post.author.username }}</span>
+                    </div>
+                    {% if my_boards %}
+                    <form action="{{ url_for('pin_post', post_id=post.id) }}" method="POST" class="pin-form">
+                        <select name="board_id" class="form-input-sm">
+                            {% for board in my_boards %}
+                            <option value="{{ board.id }}">{{ board.emoji }} {{ board.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-peacock-sm">📌 Pin</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <aside class="feed-right">
+        <div class="widget">
+            <h4 class="widget-title">💡 Saaj Tips</h4>
+            <ul class="tips-list">
+                <li>📌 Koi bhi post apne board mein save kar sakte ho</li>
+                <li>🎨 Board ko emoji se personalize karo</li>
+                <li>🔗 Doston ke saath share karo</li>
+            </ul>
+        </div>
+    </aside>
+</div>
+{% endblock %}

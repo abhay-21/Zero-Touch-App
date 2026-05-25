@@ -1,0 +1,108 @@
+<div class="post-card" id="post-{{ post.id }}">
+    <!-- Header -->
+    <div class="post-header">
+        <a href="{{ url_for('profile', username=post.author.username) }}" class="post-author-link">
+            <img src="{{ post.author.avatar_url }}" alt="{{ post.author.username }}" class="avatar-md">
+            <div class="post-author-info">
+                <div class="post-author-name">
+                    {{ post.author.username }}
+                    {% if post.author.verified %}<span class="verified-badge">✓</span>{% endif %}
+                </div>
+                <div class="post-meta">
+                    {{ post.timestamp.strftime('%d %b, %H:%M') }}
+                    {% if post.community %}
+                    · <a href="{{ url_for('community_detail', community_id=post.community.id) }}" class="post-samaj-link">{{ post.community.emoji }} {{ post.community.name }}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        <div class="post-options">
+            <button class="icon-ghost-btn" title="More options"><i data-feather="more-horizontal"></i></button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="post-body">
+        <p class="post-text">{{ post.content }}</p>
+        {% if post.image_url %}
+        <div class="post-image-wrap">
+            <img src="{{ post.image_url }}" alt="Post image" class="post-image" loading="lazy" onerror="this.style.display='none'">
+        </div>
+        {% endif %}
+        {% if post.video_url %}
+        <div class="post-video-wrap">
+            {% set vid_id = post.video_url.split('v=')[-1].split('&')[0] if 'v=' in post.video_url else post.video_url.split('/')[-1] %}
+            <iframe src="https://www.youtube.com/embed/{{ vid_id }}" frameborder="0" allowfullscreen class="post-video-iframe"></iframe>
+        </div>
+        {% endif %}
+        {% if post.tags %}
+        <div class="post-tags">
+            {% for tag in post.tags.split() %}
+            <span class="tag-chip-sm">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="post-actions">
+        <button class="post-action-btn like-btn-ajax {% if post.id in liked_ids %}liked{% endif %}" 
+                data-post-id="{{ post.id }}" title="Pasand karo">
+            <span class="like-heart">❤️</span>
+            <span class="like-count">{{ post.like_count }}</span>
+        </button>
+
+        <button class="post-action-btn comment-toggle-btn" data-post-id="{{ post.id }}" title="Comment karo">
+            <i data-feather="message-circle"></i>
+            <span>{{ post.comment_count }}</span>
+        </button>
+
+        <button class="post-action-btn" onclick="navigator.share ? navigator.share({title:'Zero Touch App', text:'{{ post.content[:80] }}', url: window.location.href}) : alert('Link copy karo!')" title="Share karo">
+            <i data-feather="share-2"></i>
+            <span>Share</span>
+        </button>
+
+        {% set cu = current_user() %}
+        {% if cu %}
+        <button class="post-action-btn pin-btn" onclick="showPinModal({{ post.id }})" title="Pin karo">
+            <i data-feather="bookmark"></i>
+            <span>Save</span>
+        </button>
+        {% endif %}
+
+        {% if post.author.upi_id %}
+        <button class="post-action-btn tip-btn" onclick="showUpiModal('{{ post.author.username }}', '{{ post.author.upi_id }}')" title="Support karo via UPI">
+            💸 <span>Tip</span>
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Comments Section -->
+    <div class="comments-section" id="comments-{{ post.id }}" style="display:none">
+        {% for comment in post.comments.order_by('timestamp').all() %}
+        <div class="comment-item">
+            <img src="{{ comment.author.avatar_url }}" alt="{{ comment.author.username }}" class="avatar-xs">
+            <div class="comment-body">
+                <div class="comment-author">{{ comment.author.username }}</div>
+                <div class="comment-text">{{ comment.content }}</div>
+            </div>
+        </div>
+        {% endfor %}
+        <form action="{{ url_for('comment_post', post_id=post.id) }}" method="POST" class="comment-form">
+            <img src="{{ cu.avatar_url }}" alt="" class="avatar-xs">
+            <input type="text" name="content" class="comment-input" placeholder="Comment likho..." required>
+            <button type="submit" class="comment-submit">↑</button>
+        </form>
+    </div>
+</div>
+
+<!-- UPI Modal (shared script handles it) -->
+<script>
+document.querySelectorAll('.comment-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.dataset.postId;
+        const el = document.getElementById('comments-' + id);
+        if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    });
+});
+</script>
