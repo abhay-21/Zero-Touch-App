@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+
+# Local DB (mounted as Docker volume in production)
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Keys & Secrets (NEVER in Docker image)
+*.pem
+.env
+.env.*
+
+# Dev tools
+.vscode/
+.idea/
+*.swp
+
+# Docs
+*.md
+README*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Monitoring configs (not part of app image)
+monitoring/

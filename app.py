@@ -26,12 +26,30 @@ from models import (
     Like, Comment, Notification, followers_table
 )
 
+# Prometheus metrics (only loaded if package is installed)
+try:
+    from prometheus_flask_exporter import PrometheusMetrics
+    PROMETHEUS_ENABLED = True
+except ImportError:
+    PROMETHEUS_ENABLED = False
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'zerotouch-bharat-2024-desi-secret'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///zerotouch_social.db'
+
+# ── Config — reads from environment variables in production ──────
+app.config['SECRET_KEY']  = os.environ.get('SECRET_KEY', 'zerotouch-bharat-dev-secret-change-in-prod')
+# In Docker: DATABASE_URL is set to sqlite:////app/instance/zerotouch_social.db
+# Locally:   falls back to Flask's default instance/ folder
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL', 'sqlite:///zerotouch_social.db'
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+
+# ── Prometheus metrics endpoint (/metrics) ───────────────────────
+if PROMETHEUS_ENABLED:
+    metrics = PrometheusMetrics(app, group_by='endpoint')
+    metrics.info('zerotouch_app_info', 'Zero Touch App — Bharat Social Media', version='2.0')
 
 
 # ─── Auth Helpers ────────────────────────────────────────────────
@@ -536,12 +554,34 @@ def notification_count():
     return jsonify({'count': count})
 
 
+# ─── Health Check ────────────────────────────────────────────────
+# Used by Jenkins pipeline and load balancers — no auth required
+
+@app.route('/health')
+def health_check():
+    """Liveness probe for Jenkins CI/CD, Docker, and K8s."""
+    try:
+        # Quick DB connectivity check
+        user_count = User.query.count()
+        return jsonify({
+            'status':    'healthy',
+            'app':       'Zero Touch App',
+            'version':   '2.0',
+            'db_users':  user_count,
+            'timestamp': datetime.utcnow().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({'status': 'unhealthy', 'error': str(e)}), 500
+
+
 # ─── DB Init ─────────────────────────────────────────────────────
 
 with app.app_context():
+    os.makedirs(app.instance_path, exist_ok=True)
     db.create_all()
     seed_data()
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    debug_mode = os.environ.get('FLASK_ENV', 'production') == 'development'
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)

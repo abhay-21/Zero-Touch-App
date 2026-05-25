@@ -1,0 +1,47 @@
+# ================================================================
+# Prometheus Configuration — Zero Touch App
+# Scrapes metrics from the Flask app's /metrics endpoint
+# ================================================================
+
+global:
+  scrape_interval:     15s   # Pull metrics every 15 seconds
+  evaluation_interval: 15s   # Evaluate alert rules every 15 seconds
+  scrape_timeout:      10s
+
+# ── Rule files ──────────────────────────────────────────────────
+rule_files:
+  - "alert_rules.yml"
+
+# ── Alertmanager (optional — configure if you add email/Slack) ──
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['localhost:9093']
+
+# ── Scrape Configs ──────────────────────────────────────────────
+scrape_configs:
+
+  # ── 1. Prometheus itself ──────────────────────────────────────
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ── 2. Zero Touch App (Flask + prometheus-flask-exporter) ─────
+  - job_name: 'zerotouch_app'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['zerotouch-app:5000']   # Docker container name
+        labels:
+          app:         'zerotouch-app'
+          environment: 'production'
+          instance:    'ec2-t3-micro'
+
+  # ── 3. Node Exporter (EC2 host system metrics) ────────────────
+  # Run with: docker run -d --name node-exporter --net=host prom/node-exporter
+  - job_name: 'node_exporter'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['localhost:9100']
+        labels:
+          instance: 'aws-ec2-zerotouch'

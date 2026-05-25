@@ -1,0 +1,36 @@
+# ================================================================
+# Prometheus Alert Rules — Zero Touch App
+# ================================================================
+groups:
+  - name: zerotouch_alerts
+    rules:
+
+      # App is completely down
+      - alert: AppDown
+        expr: up{job="zerotouch_app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Zero Touch App is DOWN"
+          description: "The app at {{ $labels.instance }} has been down for more than 1 minute."
+
+      # High error rate (5xx responses)
+      - alert: HighErrorRate
+        expr: rate(flask_http_request_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High 5xx error rate"
+          description: "Error rate is {{ $value }} req/s (threshold: 0.1)"
+
+      # Slow response time
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow response time (P95 > 2s)"
+          description: "95th percentile response time is {{ $value }}s"
