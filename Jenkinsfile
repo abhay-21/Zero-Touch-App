@@ -74,7 +74,7 @@ pipeline {
         stage('📁 Prepare Data Volume') {
             steps {
                 echo '=== Ensuring DB volume directory exists on host ==='
-                sh "sudo mkdir -p ${DB_VOLUME_PATH} && sudo chmod 777 ${DB_VOLUME_PATH}"
+                sh "mkdir -p ${DB_VOLUME_PATH}"
             }
         }
 
