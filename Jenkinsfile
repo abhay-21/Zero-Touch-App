@@ -83,9 +83,11 @@ pipeline {
             steps {
                 echo '=== Starting new container ==='
                 sh """
+                    docker network create monitoring 2>/dev/null || true
                     docker run -d \
                         --name ${CONTAINER_NAME} \
                         --restart unless-stopped \
+                        --network monitoring \
                         -p ${APP_PORT}:5000 \
                         -v ${DB_VOLUME_PATH}:/app/instance \
                         -e FLASK_ENV=production \
