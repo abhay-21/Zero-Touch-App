@@ -123,7 +123,7 @@ pipeline {
                 // Keep only the last 3 tagged versions
                 sh """
                     docker images ${IMAGE_NAME} --format "{{.Tag}}" \
-                    | grep -E '^[0-9]+$' \
+                    | grep -E '^[0-9]+\$' \
                     | sort -n \
                     | head -n -3 \
                     | xargs -I {} docker rmi ${IMAGE_NAME}:{} 2>/dev/null || true
