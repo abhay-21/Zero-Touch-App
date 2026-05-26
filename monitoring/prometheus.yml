@@ -38,10 +38,9 @@ scrape_configs:
           instance:    'ec2-t3-micro'
 
   # ── 3. Node Exporter (EC2 host system metrics) ────────────────
-  # Run with: docker run -d --name node-exporter --net=host prom/node-exporter
   - job_name: 'node_exporter'
     scrape_interval: 30s
     static_configs:
-      - targets: ['localhost:9100']
+      - targets: ['node-exporter:9100']
         labels:
           instance: 'aws-ec2-zerotouch'
