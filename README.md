@@ -56,11 +56,18 @@ The AWS Security Group is configured to expose the following ports:
 * **Port 9090:** Prometheus Web UI.
 * **Port 3000:** Grafana Dashboard UI.
 
+### 🐳 1.1 Docker Container Deployment Status
+The production environment runs isolated containers connected via a custom virtual network named `monitoring`.
+
+![Docker Containers Status](screenshots/docker_screenshot.png)
+
 ---
 
 ## 🔧 2. CI/CD Pipeline Configuration (`Jenkinsfile`)
 
 We implemented a **Declarative Pipeline** defined in a `Jenkinsfile` in the root of the repository. Jenkins fetches this file on every GitHub push via a Webhook trigger, automating compilation, validation, and zero-touch deployment.
+
+![Jenkins Pipeline Run](screenshots/jenkins_screenshot.png)
 
 ### Key Jenkins Configurations:
 * **Concurrency Protection:** Disabled concurrent builds to prevent port conflicts on a single-node host.
@@ -257,7 +264,12 @@ Jenkinsfile
 The application has enterprise monitoring built directly into the container stack:
 1. **Metrics Export:** The Flask application uses the `prometheus-flask-exporter` library to expose standard HTTP request and process metrics on a `/metrics` route.
 2. **Prometheus Scraping:** Prometheus runs in a dedicated container on the `monitoring` bridge network, pulling metrics from the application container every 10 seconds.
+
+   ![Prometheus Scrape Targets](screenshots/prometheus_screenshot.png)
+
 3. **Visualization:** Grafana runs in another container, connecting to Prometheus as a data source to display live telemetry.
+
+   ![Grafana Dashboard](screenshots/grafana_screenshot.png)
 
 ### The [Prometheus Config](file:///d:/Downloads%20D/Cloud%20And%20Devops%20Project/Zero-Touch-App/monitoring/prometheus.yml) (`prometheus.yml`):
 ```yaml
@@ -325,6 +337,8 @@ The web application is built on Flask, providing a fully functional, sleek, and 
 * **Social Feeds & Boards:** Users can post texts, search hashtags, create customized Boards (like Pinterest), and create Communities (like Reddit).
 * **Reels / Shorts:** Video reel view supporting native interactions (likes, comments).
 * **Interactive Design:** Rich modern aesthetics using custom styling variables, custom gradients, glassmorphism, responsive menus, micro-animations, and full-screen layouts.
+
+![Social Media App Interface](screenshots/app_screenshot.png)
 
 ---
 
